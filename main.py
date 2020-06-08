@@ -1,71 +1,77 @@
-from tkinter import *
+import gi
+
+gi.require_version("Gtk", "3.0")
+from gi.repository import Gtk
 from math import sqrt
 
-def solver(a,b,c):
-   
-   
+def solve(a,b,c):
+    """ Решает квадратное уравнение и выводит отформатированный ответ """
+    # находим дискриминант
     D = b*b - 4*a*c
-    if D >= 0:
+    if D > 0:
         x1 = (-b + sqrt(D)) / (2*a)
         x2 = (-b - sqrt(D)) / (2*a)
-        text = "Дискриминант равен: %s \n X1 is: %s \n X2 is: %s \n" % (D, x1, x2)
+        text = "Discriminant is: %.4s \n X1 is: %.4s \n X2 is: %.4s \n" % (D, x1, x2)
+    elif D == 0:
+        x1 = (-b + sqrt(D)) / (2*a)
+        text = "Discriminant is: %.4s \n X is: %.4s \n" % (D, x1)
     else:
-        text = "Дискриминант равен: %s \n Решений нет" % D
+        text = "Discriminant is: %.4s \n No solutions" % D
     return text
 
-def inserter(value):
-
-    output.delete("0.0","end")
-    output.insert("0.0",value)
-
-def handler():
-   
-    try:
-      
-        a_val = float(a.get())
-        b_val = float(b.get())
-        c_val = float(c.get())
-        inserter(solver(a_val, b_val, c_val))
-    except ValueError:
-        inserter("Убедитесь, что ввели три значения")
+def insert(value):
+    """" Inserting values into text widget"""
+    win.form.set_text(value)
 
 
-root = Tk()
+class MyWindow(Gtk.Window):
+    def __init__(self):
+        Gtk.Window.__init__(self, title="Quaratic equations solver")
+        self.set_default_size(370, -1)
+        self.set_resizable(False)
 
-root.title("Калькулятор квадратных уравнений")
+        grid = Gtk.Grid()
+        self.add(grid)
+        grid.set_column_spacing(5)
+        grid.set_row_spacing(10)
 
-root.minsize(325,230)
+        self.entry1 = Gtk.Entry()
+        self.entry1.set_width_chars(6)
+        self.label1 = Gtk.Label("x^2 +")
+        self.entry2 = Gtk.Entry()
+        self.entry2.set_width_chars(6)
+        self.label2 = Gtk.Label("x +")
+        self.entry3 = Gtk.Entry()
+        self.entry3.set_width_chars(6)
+        self.label3 = Gtk.Label("= 0")
+        self.solve_but = Gtk.Button(label = "Solve")
+        self.solve_but.connect("clicked", self.on_button_clicked)
+        
+        self.form = Gtk.Label()
+        self.form.set_justify(Gtk.Justification.LEFT)
+        
+        
+        grid.add(self.entry1)
+        grid.attach(self.label1, 1, 0, 1, 1)
+        grid.attach_next_to(self.entry2, self.label1, Gtk.PositionType.RIGHT, 1, 1)
+        grid.attach_next_to(self.label2, self.entry2, Gtk.PositionType.RIGHT, 1, 1)
+        grid.attach_next_to(self.entry3, self.label2, Gtk.PositionType.RIGHT, 1, 1)
+        grid.attach_next_to(self.label3, self.entry3, Gtk.PositionType.RIGHT, 1, 1)
+        grid.attach_next_to(self.solve_but, self.label3, Gtk.PositionType.RIGHT, 1, 1)
+        grid.attach(self.form, 0, 1, 6, 2)
 
-root.resizable(width=False, height=False)
+    def on_button_clicked(self, button):
+        """ Get the content of entries and passes result to the output area """
+        try:
+            a_val = float(self.entry1.get_text())
+            b_val = float(self.entry2.get_text())
+            c_val = float(self.entry3.get_text())
+            insert(solve(a_val, b_val, c_val))
+        except ValueError:
+            insert("No 3 values")
 
 
-frame = Frame(root)
-frame.grid()
-
-
-a = Entry(frame, width=3)
-a.grid(row=1,column=1,padx=(10,0))
-
-
-a_lab = Label(frame, text="x**2+").grid(row=1,column=2)
-
-
-b = Entry(frame, width=3)
-b.grid(row=1,column=3)
-
-b_lab = Label(frame, text="x+").grid(row=1, column=4)
-
-
-c = Entry(frame, width=3)
-c.grid(row=1, column=5)
-
-c_lab = Label(frame, text="= 0").grid(row=1, column=6)
-
-
-but = Button(frame, text="Решить", command=handler).grid(row=1, column=7, padx=(10,0))
-
-output = Text(frame, bg="lightblue", font="Arial 12", width=35, height=10)
-output.grid(row=2, columnspan=8)
-
-
-root.mainloop()
+win = MyWindow()
+win.connect("destroy", Gtk.main_quit)
+win.show_all()
+Gtk.main()
