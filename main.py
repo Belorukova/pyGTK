@@ -27,7 +27,7 @@ def handler():
         c_val = float(c.get())
         inserter(solver(a_val, b_val, c_val))
     except ValueError:
-        inserter("Убедитесь, что вы ввели три значения")
+        inserter("Убедитесь, что ввели три значения")
 
 
 root = Tk()
